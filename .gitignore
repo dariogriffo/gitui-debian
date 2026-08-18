@@ -1,0 +1,21 @@
+# .deb Packages
+*.deb
+
+# Source packages and downloaded upstream tarballs
+*.dsc
+*.orig.tar.gz
+*.debian.tar.xz
+*.tar.gz
+*.tar.xz
+*.buildinfo
+*.changes
+
+# Extracted upstream release directories and .deb innards
+gitui-linux-*/
+gitui-[0-9]*/
+debian-binary
+control.tar.*
+data.tar.*
+
+.idea/*
+.DS_Store

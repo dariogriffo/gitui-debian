@@ -1,0 +1,48 @@
+#!/usr/bin/make -f
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+GITUI_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+# Upstream release assets do not carry the version in their filename, only in
+# the download URL, so the asset name is arch-only.
+override_dh_auto_build:
+	@arch="$(DEB_HOST_ARCH)"; \
+	case "$$arch" in \
+		amd64)   GITUI_RELEASE="gitui-linux-x86_64" ;; \
+		arm64)   GITUI_RELEASE="gitui-linux-aarch64" ;; \
+		armhf)   GITUI_RELEASE="gitui-linux-armv7" ;; \
+		*) echo "Unsupported architecture: $$arch"; exit 1 ;; \
+	esac; \
+	echo "Downloading $$GITUI_RELEASE for $(GITUI_VERSION)..."; \
+	wget -q "https://github.com/gitui-org/gitui/releases/download/v$(GITUI_VERSION)/$$GITUI_RELEASE.tar.gz"; \
+	mkdir -p "$$GITUI_RELEASE"; \
+	tar -xf "$$GITUI_RELEASE.tar.gz" -C "$$GITUI_RELEASE"; \
+	rm -f "$$GITUI_RELEASE.tar.gz"; \
+	echo "$$GITUI_RELEASE" > .gitui_release_name
+
+# The tarball is flat: it contains only ./gitui. Upstream ships no man page and
+# no shell completions, and the binary cannot generate completions either.
+override_dh_auto_install:
+	@GITUI_RELEASE=$$(cat .gitui_release_name); \
+	install -D -m 755 "$$GITUI_RELEASE/gitui" debian/gitui/usr/bin/gitui
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+	@if [ -f .gitui_release_name ]; then \
+		GITUI_RELEASE=$$(cat .gitui_release_name); \
+		rm -rf "$$GITUI_RELEASE" .gitui_release_name || true; \
+	fi
+
+# Upstream ships stripped release binaries; do not touch them.
+override_dh_strip:
+
+# The binaries are prebuilt upstream artifacts (amd64 is a static musl build,
+# arm64/armhf are glibc builds cross-compiled by upstream CI). dh_shlibdeps
+# cannot resolve foreign-arch binaries during a source build, so the runtime
+# dependencies are declared explicitly in debian/control instead.
+override_dh_shlibdeps:

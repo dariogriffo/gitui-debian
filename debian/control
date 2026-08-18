@@ -1,0 +1,21 @@
+Source: gitui
+Section: vcs
+Priority: optional
+Maintainer: Dario Griffo <dariogriffo@gmail.com>
+Build-Depends: debhelper-compat (= 13), wget, ca-certificates
+Standards-Version: 4.6.2
+Homepage: https://github.com/gitui-org/gitui
+Rules-Requires-Root: no
+
+Package: gitui
+Architecture: amd64 arm64 armhf
+Depends: ${misc:Depends}, libc6 (>= 2.28) [arm64 armhf], libgcc-s1 [arm64 armhf]
+Description: blazing fast terminal-ui for git
+ gitui is a terminal UI for git, written in Rust. It provides a fast and
+ intuitive interface for staging hunks and lines, browsing and inspecting the
+ log, diffing, stashing, branching, rebasing, blaming and pushing, without
+ leaving the terminal.
+ .
+ The amd64 binary shipped by upstream is a statically linked musl build and
+ needs no shared libraries; the arm64 and armhf binaries are linked against
+ glibc.
