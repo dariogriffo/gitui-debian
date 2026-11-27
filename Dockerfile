@@ -28,5 +28,7 @@ RUN sed -i "s/gitui_VERSION/$gitui_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
 RUN sed -i "s/PACKAGE_DEPENDS/$DEPENDS/" /output/DEBIAN/control
+# Static builds have no dependencies: drop the field rather than ship it empty
+RUN sed -i '/^Depends:[[:space:]]*$/d' /output/DEBIAN/control
 
 RUN dpkg-deb -Zxz --build /output /gitui_${FULL_VERSION}.deb
